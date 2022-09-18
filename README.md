@@ -7,3 +7,5 @@ To execute the Python model in a Jupyiter notebook click: [Boost Converter Model
 To execute the C model in an onlineGDB interpreter click: [Boost Converter Model C](https://onlinegdb.com/6iAW8Ta4o)
 
 To execute the Matlab/Simulink model a license is necessary. Otherwise check the [Boost Converter Matlab Report](./Boost_Converter_Report.pdf)
+
+![Boost Converter Model](https://raw.githubusercontent.com/bueroingleuering/Boost_Converter/main/PFC_Boost_Converter_Model.png)
