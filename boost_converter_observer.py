@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import control as ct
 from scipy.signal import square
-from scipy.linalg import solve_discrete_are
 """Parameters"""
 f_Switch = 50.0e3  # 50 kHz
 Duty = 0.5  # 50 %
@@ -28,34 +26,31 @@ A_ss = np.array([[-(R_L + Duty * R_DS) / L_0, -(1 - Duty) / L_0], [(1 - Duty) / 
 B_ss = np.array([[1 / L_0], [0.0]])
 C_ss = np.array([[0.0, 1.0]])
 D_ss = np.array([0.0])
-Qo = ct.obsv(A_ss, C_ss)  # Observability matrix
-
-if np.linalg.matrix_rank(Qo) == A_ss.shape[0]:
-    h = 20000 * np.array([0.1, 1.0])
-    x_o = np.array([i[0], U_C[0]])
-    X_o = np.zeros((2, len(t)))
-    u = U_0 * np.ones(len(t))
-    X_o[:, 0] = x_o
-    controller_counter = 0
-    """Simulation"""
-    for index in range(1, len(t)):
-        controller_counter += 1
-        """switch mode"""
-        if gate_pulse[index] > 0:
-            didt = (U_0 - (R_DS + R_L) * i[index - 1]) / L_0
-            dU_Cdt = (-U_C[index - 1] / R_Load) / C_0
-        else:
-            didt = (U_0 - R_L * i[index - 1] - U_C[index - 1]) / L_0
-            dU_Cdt = (i[index - 1] - U_C[index - 1] / R_Load) / C_0
-        i[index] = i[index - 1] + didt * T_Step
-        U_C[index] = U_C[index - 1] + dU_Cdt * T_Step
-        """state space"""
-        if controller_counter >= 400:
-            x_dot_delta = h * (C_ss @ x_o - U_C[index])
-            x_dot = A_ss @ x_o + B_ss.flatten() * u[index - 1] - x_dot_delta
-            x_o = x_o + x_dot * T_Step * controller_counter
-            controller_counter = 0
-        X_o[:, index] = x_o
+"""Simulation"""
+h = 20000 * np.array([0.1, 1.0])
+x_o = np.array([i[0], U_C[0]])
+X_o = np.zeros((2, len(t)))
+u = U_0 * np.ones(len(t))
+X_o[:, 0] = x_o
+controller_counter = 0
+for index in range(1, len(t)):
+    controller_counter += 1
+    """switch mode"""
+    if gate_pulse[index] > 0:
+        didt = (U_0 - (R_DS + R_L) * i[index - 1]) / L_0
+        dU_Cdt = (-U_C[index - 1] / R_Load) / C_0
+    else:
+        didt = (U_0 - R_L * i[index - 1] - U_C[index - 1]) / L_0
+        dU_Cdt = (i[index - 1] - U_C[index - 1] / R_Load) / C_0
+    i[index] = i[index - 1] + didt * T_Step
+    U_C[index] = U_C[index - 1] + dU_Cdt * T_Step
+    """state space"""
+    if controller_counter >= 400:
+        x_dot_delta = h * (C_ss @ x_o - U_C[index])
+        x_dot = A_ss @ x_o + B_ss.flatten() * u[index - 1] - x_dot_delta
+        x_o = x_o + x_dot * T_Step * controller_counter
+        controller_counter = 0
+    X_o[:, index] = x_o
 i_o = X_o[0, :]
 U_Co = X_o[1, :]
 """Plots"""
